@@ -1,4 +1,4 @@
-package com.example.puppy.view // Perubahan: Package
+package com.example.puppy.view
 
 import android.content.Context
 import androidx.compose.foundation.BorderStroke
@@ -6,40 +6,38 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.* // Wildcard
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight // Menggunakan auto-mirrored
-import androidx.compose.material3.* // Wildcard
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-// import androidx.compose.ui.graphics.Color // Dihapus jika semua dari tema
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage // Untuk memuat gambar dari URL jika userProfile punya photoUrl
-import com.example.puppy.R // Perubahan
-import com.example.puppy.data.UserRepository // Perubahan
-import com.example.puppy.service.RetrofitInstance // Perubahan
-import com.example.puppy.service.TokenManager // Perubahan
-import com.example.puppy.view_model.ProfileViewModel // Perubahan
+import com.example.puppy.R
+import com.example.puppy.data.UserRepository
+import com.example.puppy.service.RetrofitInstance
+import com.example.puppy.service.TokenManager
+import com.example.puppy.view_model.ProfileViewModel
 
 @Composable
-fun ProfileScreen(navController: NavController, context: Context = LocalContext.current) { // Default context
+fun ProfileScreen(navController: NavController) {
 
+    val context = LocalContext.current
     val viewModel = remember {
-        val tokenManager = TokenManager(context) // Dari com.example.puppy
-        val repository = UserRepository( // Dari com.example.puppy
-            api = RetrofitInstance.userService, // Dari com.example.puppy
+        val tokenManager = TokenManager(context)
+        val repository = UserRepository(
+            api = RetrofitInstance.userService,
             tokenManager = tokenManager,
             context = context
         )
@@ -54,60 +52,53 @@ fun ProfileScreen(navController: NavController, context: Context = LocalContext.
     }
 
     val userName = if (isLoading) "Loading..." else userProfile?.fullName ?: "Guest"
-    val userEmail = userProfile?.email // Ambil email jika ada, untuk ditampilkan atau sbg alt text
-    val userRole = "Regular" // Tetap hardcoded sesuai asli
-
-    // Idealnya userImage diambil dari userProfile?.photoUrl jika ada
-    // Untuk sekarang, kita gunakan placeholder jika tidak ada data dari userProfile
-    // val userImageUrl = userProfile?.photoUrl
+    val userRole = "Regular"
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // Perubahan: Warna latar utama
+            .background(MaterialTheme.colorScheme.background)
     ) {
         item {
             // Header
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(240.dp) // Ketinggian header bisa disesuaikan
-                    .background(MaterialTheme.colorScheme.primary) // Perubahan: Warna latar header
+                    .height(240.dp)
+                    .background(MaterialTheme.colorScheme.primary)
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .align(Alignment.Center) // Pusatkan seluruh kolom header
-                        .padding(bottom = 20.dp) // Beri padding bawah agar tidak terlalu mepet ke opsi
+                        .align(Alignment.Center)
+                        .padding(bottom = 20.dp)
                 ) {
-                    // Jika userProfile.photoUrl ada, gunakan AsyncImage, jika tidak, gunakan placeholder
-                    // Untuk contoh ini, kita gunakan placeholder default karena UserProfileResponse tidak punya photoUrl
                     Image(
-                        painter = painterResource(id = R.drawable.ic_default_user_avatar), // PERHATIAN: Ganti dengan placeholder avatar Anda
+                        painter = painterResource(id = R.drawable.ic_default_user_avatar),
                         contentDescription = "Profile Picture",
                         modifier = Modifier
                             .size(90.dp)
                             .clip(CircleShape)
                             .border(
                                 4.dp,
-                                MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f), // Perubahan: Warna border dengan sedikit transparansi
+                                MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
                                 CircleShape
                             )
-                            .background(MaterialTheme.colorScheme.surfaceVariant), // Background jika gambar gagal load atau transparan
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
                         contentScale = ContentScale.Crop
                     )
-                    Spacer(modifier = Modifier.height(12.dp)) // Jarak lebih besar
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = userName,
-                        style = MaterialTheme.typography.headlineSmall, // Style dari tema
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimary // Perubahan: Warna teks
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = userRole,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f) // Perubahan: Warna teks dengan transparansi
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
                     )
                 }
             }
@@ -122,14 +113,14 @@ fun ProfileScreen(navController: NavController, context: Context = LocalContext.
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                 Text(
                     text = "Account",
-                    style = MaterialTheme.typography.titleLarge, // Style dari tema
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground, // Perubahan: Warna teks
-                    modifier = Modifier.padding(bottom = 12.dp) // Padding lebih besar
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(bottom = 12.dp)
                 )
-                ProfileOption(title = "Change Email") { /* TODO: Navigasi atau aksi */ }
-                ProfileOption(title = "Change Password") { /* TODO: Navigasi atau aksi */ }
-                ProfileOption(title = "Settings") { /* TODO: Navigasi atau aksi */ }
+                ProfileOption(title = "Change Email")
+                ProfileOption(title = "Change Password")
+                ProfileOption(title = "Settings")
             }
         }
 
@@ -142,63 +133,66 @@ fun ProfileScreen(navController: NavController, context: Context = LocalContext.
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                 Text(
                     text = "Help Center",
-                    style = MaterialTheme.typography.titleLarge, // Style dari tema
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground, // Perubahan: Warna teks
+                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
-                ProfileOption(title = "FAQ") { /* TODO: Navigasi atau aksi */ }
-                ProfileOption(title = "Terms & Conditions") { /* TODO: Navigasi atau aksi */ }
+                ProfileOption(title = "FAQ")
+                ProfileOption(title = "Terms & Conditions")
             }
         }
 
         item {
-            Spacer(modifier = Modifier.height(32.dp)) // Jarak lebih besar sebelum tombol Log Out
+            Spacer(modifier = Modifier.height(32.dp))
         }
 
         // Tombol Log Out
         item {
             Button(
                 onClick = {
-                    TokenManager(context).clearToken() // Menggunakan TokenManager dari com.example.puppy
+                    // --- PERBAIKAN DI SINI ---
+                    // Gunakan nama fungsi yang benar: clearData()
+                    TokenManager(context).clearData()
+
                     navController.navigate("welcome") {
-                        popUpTo("home") { inclusive = true } // Asumsi "home" adalah route utama setelah login
+                        popUpTo("home") { inclusive = true }
                         launchSingleTop = true
                     }
                 },
-                shape = RoundedCornerShape(50), // Bentuk tombol tetap
+                shape = RoundedCornerShape(50),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 5.dp, horizontal = 24.dp)
-                    .height(52.dp), // Tinggi tombol disesuaikan
+                    .height(52.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer, // Perubahan: Warna tombol error
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer // Perubahan: Warna teks tombol error
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
                 )
             ) {
                 Text(
                     text = "Log Out",
-                    style = MaterialTheme.typography.labelLarge // Style dari tema
+                    style = MaterialTheme.typography.labelLarge
                 )
             }
-            Spacer(modifier = Modifier.height(24.dp)) // Padding di akhir layar
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
-private fun ProfileOption(title: String, onClick: () -> Unit = { /* TODO */ }) { // Tambahkan parameter onClick
+private fun ProfileOption(title: String, onClick: () -> Unit = { /* TODO */ }) {
     Card(
-        shape = RoundedCornerShape(16.dp), // Bentuk lebih lembut
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline), // Perubahan: Warna border
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp)
-            .height(56.dp) // Tinggi opsi disesuaikan
-            .clickable(onClick = onClick), // Menggunakan onClick dari parameter
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp), // Tanpa shadow untuk tampilan bersih
+            .height(56.dp)
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface // Perubahan: Warna kontainer
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Row(
@@ -210,14 +204,14 @@ private fun ProfileOption(title: String, onClick: () -> Unit = { /* TODO */ }) {
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge, // Style dari tema
-                color = MaterialTheme.colorScheme.onSurface, // Perubahan: Warna teks
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Medium
             )
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, // Menggunakan ikon auto-mirrored
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = "Go to $title",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant // Perubahan: Warna ikon
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

@@ -154,11 +154,11 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("profile") {
                             val context = LocalContext.current
-                            ProfileScreen(navController, context)
+                            ProfileScreen(navController)
                         }
                         composable("feed") {
                             val context = LocalContext.current
-                            FeedScreen(navController, context)
+                            FeedScreen(navController)
                         }
                         composable("market") {
                             MarketScreen(navController) // Context tidak dibutuhkan MarketScreen statis
@@ -169,7 +169,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("dogprofile") { // Perubahan: Route catprofile -> dogprofile
                             val context = LocalContext.current
-                            DogProfileScreen(navController, context) // Perubahan: Memanggil DogProfileScreen
+                            DogProfileScreen(navController) // Perubahan: Memanggil DogProfileScreen
                         }
                         composable("upload") { // Route untuk PostFeedScreen
                             val context = LocalContext.current

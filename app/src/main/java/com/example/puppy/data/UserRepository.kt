@@ -22,30 +22,50 @@ import java.io.File
 class UserRepository(
     private val api: UserService,
     private val tokenManager: TokenManager,
-    private val context: Context
+    private val context: Context // context tidak digunakan, bisa dihapus jika tidak ada rencana penggunaan
 ) {
     suspend fun register(request: RegisterRequest): Response<AuthResponse> {
         return api.register(request)
     }
 
     suspend fun login(request: LoginRequest): Result<String> {
-        return try {
-            val response = api.login(request)
-            if (response.isSuccessful) {
-                val token = response.body()?.token ?: return Result.failure(Exception("No token found"))
+        try {
+            // STEP 1: Panggil API Login untuk mendapatkan token
+            val loginResponse = api.login(request)
+
+            if (loginResponse.isSuccessful) {
+                val token = loginResponse.body()?.token ?: return Result.failure(Exception("Token tidak ditemukan dari API"))
+
+                // Setelah token didapat, simpan sementara untuk panggilan berikutnya
                 tokenManager.saveToken(token)
-                Result.success(token)
+
+                // STEP 2: Panggil API Get Profile untuk mendapatkan data user (termasuk ID)
+                val profileResponse = api.getProfile("Bearer $token")
+                if (profileResponse.isSuccessful) {
+                    val userId = profileResponse.body()?.id ?: return Result.failure(Exception("User ID tidak ditemukan dari API profil"))
+
+                    // Setelah User ID juga didapat, simpan secara permanen
+                    tokenManager.saveUserId(userId.toString())
+
+                    // Jika semua berhasil, kembalikan Result sukses
+                    return Result.success(token)
+                } else {
+                    // Handle jika panggilan getProfile gagal
+                    tokenManager.clearData() // Bersihkan token yang sempat tersimpan
+                    return Result.failure(Exception("Gagal mengambil profil pengguna setelah login"))
+                }
             } else {
-                val errorBody = response.errorBody()?.string()
+                // Handle jika panggilan login gagal
+                val errorBody = loginResponse.errorBody()?.string()
                 val errorMessage = try {
                     Gson().fromJson(errorBody, ErrorResponse::class.java).message
                 } catch (e: Exception) {
-                    "Login failed"
+                    "Login gagal"
                 }
-                Result.failure(Exception(errorMessage))
+                return Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            return Result.failure(e)
         }
     }
 
@@ -70,11 +90,44 @@ class UserRepository(
         )
     }
 
-    suspend fun getStatuses(): Response<List<StatusResponse>> {
-        val token = tokenManager.getToken()
-            ?: throw IllegalStateException("Token is null")
-        return api.getStatuses("Bearer $token")
+    // --- FUNGSI YANG DIPERBAIKI DAN DITAMBAHKAN ---
+
+    /**
+     * DIPERBAIKI: Menggunakan token dari parameter, bukan mengambil lagi dari TokenManager.
+     * ViewModel yang akan bertanggung jawab memberikan token.
+     */
+    suspend fun getStatuses(token: String): Response<List<StatusResponse>> {
+        return api.getStatuses(token) // Langsung teruskan token dari parameter
     }
+
+    /**
+     * BARU: Fungsi untuk menghapus status.
+     * Menyelesaikan error "Unresolved reference" di FeedViewModel.
+     */
+    suspend fun deleteStatus(token: String, postId: String): Response<Unit> {
+        return api.deleteStatus(token, postId)
+    }
+
+    suspend fun updateStatus(
+        token: String,
+        postId: String,
+        content: String,
+        photoFile: File?
+    ): Response<StatusResponse> {
+        // Ubah string content menjadi RequestBody
+        val contentPart = content.toRequestBody("text/plain".toMediaType())
+
+        // Siapkan foto jika ada
+        val photoPart = photoFile?.let {
+            val requestFile = it.asRequestBody("image/*".toMediaType())
+            MultipartBody.Part.createFormData("photo", it.name, requestFile)
+        }
+
+        return api.updateStatus("Bearer $token", postId, contentPart, photoPart)
+    }
+
+
+    // --- FUNGSI LAINNYA (TETAP SAMA) ---
 
     suspend fun getDogs(): List<Dog> {
         val token = tokenManager.getToken()

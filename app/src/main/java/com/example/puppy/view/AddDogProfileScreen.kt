@@ -24,6 +24,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 // import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -244,7 +245,7 @@ fun AddDogProfile(navController: NavController, context: Context = LocalContext.
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            GenderButton("Male", gender == "male") {
+            GenderButton("Male", gender == "male", ) {
                 viewModel.gender.value = "male"
             }
             GenderButton("Female", gender == "female") {
@@ -274,7 +275,7 @@ fun AddDogProfile(navController: NavController, context: Context = LocalContext.
                 contentColor = MaterialTheme.colorScheme.onPrimary // Perubahan
             )
         ) {
-            Text("Add Dog Profile", style = MaterialTheme.typography.titleMedium) // Perubahan: Teks tombol
+            Text("Add Dog Profile", style = MaterialTheme.typography.titleMedium, color = Color.White) // Perubahan: Teks tombol
         }
         Spacer(modifier = Modifier.height(16.dp)) // Spacer di akhir untuk padding
     }
